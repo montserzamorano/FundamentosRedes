@@ -1,4 +1,4 @@
-package clienteservidor;
+package ejercicio1;
 
 import java.io.IOException;
 import java.io.InputStream;
