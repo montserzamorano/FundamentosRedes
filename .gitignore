@@ -1,2 +1,4 @@
 # exclude compiled files
 *.class
+# exclude temporal files
+*~
