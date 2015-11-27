@@ -39,7 +39,7 @@ public class YodafyServidorConcurrente {
 			                  // Este esquema permite que se puedan usar hebras más fácilmente.
 			                  
 			                  ProcesadorYodafy procesador=new ProcesadorYodafy(socketServicio);
-			                  procesador.start(); // lanza una hebra
+			                  procesador.procesa();
 				
 			} while (true);
 			

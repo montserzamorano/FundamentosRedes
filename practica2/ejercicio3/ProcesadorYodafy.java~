@@ -101,7 +101,7 @@ public class ProcesadorYodafy extends Thread{
 		
 		return resultado;
 	}
-  public void run() {
+  public void run(){
     procesa();
   }
 
