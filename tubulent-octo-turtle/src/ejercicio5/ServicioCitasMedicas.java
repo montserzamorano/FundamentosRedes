@@ -57,11 +57,8 @@ public class ServicioCitasMedicas {
         }
         // Realiza la desconexión
         private void fin(){
-                try{
-                        socketServicio.close();
-                } catch (IOException e){
-                        System.err.println("Error no se pudo cerrar el socket");
-                } 
+            bufferEnvio = "FIN";
+            outPrinter.println(bufferEnvio);
         }
         
 	// Constructor que tiene como parámetro una referencia al socket abierto
