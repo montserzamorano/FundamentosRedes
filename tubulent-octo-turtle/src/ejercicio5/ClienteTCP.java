@@ -12,10 +12,10 @@ import java.net.UnknownHostException;
 public class ClienteTCP {
 
 	public static void main(String[] args) {
-		//En lugar de enviar arrays de bytes de un tamaño concreto
-                //se pueden enviar y recibir objetos de la clase string
-                String buferEnvio = null;
-		String buferRecepcion = null;
+		
+		byte []buferEnvio;
+		byte []buferRecepcion=new byte[256];
+		int bytesLeidos=0;
 		
 		// Nombre del host donde se ejecuta el servidor:
 		String host="localhost";
@@ -32,27 +32,27 @@ public class ClienteTCP {
                     InputStream inputStream = socketServicio.getInputStream();
                     OutputStream outputStream = socketServicio.getOutputStream();
 			
-                    // Ya no hay que pasarla a cadena de bytes
-                    buferEnvio="Al monte del volcan debes ir sin demora";
+                    // Si queremos enviar una cadena de caracteres por un OutputStream, hay que pasarla primero
+                    // a un array de bytes:
+                    buferEnvio="Al monte del volcán debes ir sin demora".getBytes();
 			
-                    //Enviamos el array por PrintWriter en vez de por
-                    //outputstream
-                    PrintWriter outPrinter = new PrintWriter(outputStream,true);
-                    
-                    //este tipo de objeto puede enviar cadenas de texto con los
-                    //métodos print o println
-                    outPrinter.println(buferEnvio);
-                    //"flush()" para obligar a TCP a que no espere para hacer el envío:
-                    outPrinter.flush();
+                    // Enviamos el array por el outputStream;
+                    outputStream.write(buferEnvio,0,buferEnvio.length) ;
 			
-                    // Leemos desde BufferedReader en lugar de desde inputStream
-                    BufferedReader inReader = new BufferedReader(new InputStreamReader(inputStream));
-                    //Se pueden recibir líneas de caracteres completas mediante readLine();
-                    buferRecepcion = inReader.readLine();
+                    // Aunque le indiquemos a TCP que queremos enviar varios arrays de bytes, sólo
+                    // los enviará efectivamente cuando considere que tiene suficientes datos que enviar...
+                    // Podemos usar "flush()" para obligar a TCP a que no espere para hacer el envío:
+                    outputStream.flush();
 			
-                    // Como es un string, no hace falta el bucle que lee cada
-                    //byte
-                    System.out.println("Recibido: " + buferRecepcion + "\n");
+                    // Leemos la respuesta del servidor. Para ello le pasamos un array de bytes, que intentará
+                    // rellenar. El método "read(...)" devolverá el número de bytes leídos.
+                    bytesLeidos = inputStream.read(buferRecepcion);
+			
+                    // Mostremos la cadena de caracteres recibidos:
+                    System.out.println("Recibido: ");
+                    for(int i=0;i<bytesLeidos;i++){
+                        System.out.print((char)buferRecepcion[i]);
+                    }
 			
                     // Una vez terminado el servicio, cerramos el socket (automáticamente se cierran
                     // el inpuStream  y el outputStream)

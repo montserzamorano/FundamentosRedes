@@ -34,8 +34,7 @@ public class ServicioCitasMedicas {
 	// Objeto para la escritura del stream 
         private PrintWriter outPrinter;
         // Información que se enviada / recibida
-        private String bufferEnvio = null, 
-                        bufferRecepcion = null;
+        private String bufferEnvio = null, bufferRecepcion = null;
         
         ////////////////////////////////////////////////////////////////////////
         // ATRIBUTOS DE CLASE
@@ -116,8 +115,7 @@ public class ServicioCitasMedicas {
                     // Lee la respuesta es sensible a mayusculas y minusculas
                     bufferRecepcion = lecturaStream();
                     posibleDNI = Integer.parseInt(bufferRecepcion);
-            }while( (00000000 > posibleDNI && posibleDNI > 99999999) ||
-                    bufferRecepcion.length()!=8 ); // acepta todos los DNI's
+            }while(00000000 > posibleDNI && posibleDNI > 99999999); // acepta todos los DNI's
         }
         // Muestra el menu en el cual el usuario decide su tipo de cita
         private String menuSeleccion(){
@@ -246,5 +244,4 @@ public class ServicioCitasMedicas {
                     this.menu();            // agrupa el paso por CITA SELECCION
             }
         }
-
 }

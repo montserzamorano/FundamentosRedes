@@ -26,21 +26,11 @@ public class Servidor {
                         // Aceptamos una nueva conexión con accept()
 			Socket socketServicio = null ;
                         try {
-                            //El método accept() para que se quede esperando una
-                            //petición de conexión. Cuando esto suceda, el ServerSocket
-                            //devuelve un objeto Socket que contiene los datos de
-                            //la tubería correspondiente a la conexión entre 
-                            //cliente y servidor. A partir de ahora es el nuevo
-                            //socket el que se utilizará para enviar y recibir
-                            //bytes.
                             socketServicio = socketServidor.accept();
                         } catch (IOException e){
                             System.out.println("Error: no se pudo aceptar la conexión solicitada.");
                         }
                         
-                        // Creamos un objeto de la clase ProcesadorYodafy, pasándole como 
-                        // argumento el nuevo socket, para que realice el procesamiento
-			// Este esquema permite que se puedan usar hebras más fácilmente.
 			ServicioCitasMedicas procesador=new ServicioCitasMedicas(socketServicio);
 			procesador.procesa();
 				
