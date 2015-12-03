@@ -46,7 +46,7 @@ public class ServicioCitasMedicas {
         // Fecha del día de hoy
         final private static Calendar hoy = Calendar.getInstance();
         
-	// Constructor que tiene como parámetro una referencia al socket abierto en por otra clase
+	// Constructor que tiene como parámetro una referencia al socket abierto
 	public ServicioCitasMedicas(Socket socketServicio) {
             agendaCalendario.add(hoy);    
             this.socketServicio=socketServicio;
@@ -96,7 +96,7 @@ public class ServicioCitasMedicas {
         }
         
         private String autentificacion(){
-            int posibleDNI; // para que sea válido ha de tener los mismos dígitos que un DNI convencional
+            int posibleDNI; // ha de tener los mismos dígitos que un DNI convencional
             // Bucle casi infinito, quizas no estaría mal limitar el número de intentos
             do{     // En primer lugar escribe por el stream al cliente, 
                     // solicitandole la pertenencia
@@ -109,7 +109,7 @@ public class ServicioCitasMedicas {
                             System.err.println("Error no se pudo obtener respuesta");
                     }
                     posibleDNI = Integer.parseInt(bufferRecepcion);
-            }while( (00000000 > posibleDNI || posibleDNI > 99999999) ||
+            }while( (00000000 > posibleDNI && posibleDNI > 99999999) ||
                     bufferRecepcion.length()!=8 ); // acepta todos los DNI's
             return "MENU";
         }
@@ -144,14 +144,14 @@ public class ServicioCitasMedicas {
             }
             return seleccion;
         }
-        // Proporciona 10 fechas que no esten ocupadas en la agendaCalendario
-        // a partir de la fecha que se pasa como parámetro
-        private ArrayList<Calendar> MasFechas(Calendar inicial){
+        // Proporciona una cantidadde  fechas que no esten ocupadas en la 
+        // agendaCalendario a partir de la fecha que se pasa como parámetro
+        private ArrayList<Calendar> MasFechas(Calendar inicial, int cantidad){
                 ArrayList<Calendar> fechasCandidatas = new ArrayList<>();
                 do{
                         // Añadimos un día a la fecha inicial
                         inicial.add(Calendar.DATE, 1);
-                        // Si dicha fecha no está en el agendaCalendario
+                        // Si dicha fecha no está en la agendaCalendario
                         if( !agendaCalendario.contains(inicial) ){
                             // es una fecha candidata
                             fechasCandidatas.add( 
@@ -161,14 +161,55 @@ public class ServicioCitasMedicas {
                             );
                         }
                     
-                }while( fechasCandidatas.size() != 10 ); // mientras no haya 10 fechas candidatas
+                }while( fechasCandidatas.size() != cantidad ); // mientras no haya 10 fechas candidatas
                 
                 return fechasCandidatas;
         }
-        // Ofrece una lista de fechas disponibles para que el usuario elija su cita
-        //private String seleccionCita(){
-                
-        //}
+        
+        // Ofrece una lista de fechas disponibles para que el usuario elija su
+        // cita, devuelve la fecha seleccionada por el cliente
+        private Calendar seleccionCita(){
+            int cant = 10;
+            boolean continua = true;
+            Calendar fechaSeleccionada = null;
+            Calendar fechaActual = Calendar.getInstance();
+            do{
+                    ArrayList<Calendar> fechasPosibles = MasFechas(fechaActual, cant);
+                    int numeroFecha = 0;
+                    String listaFechas = "Fechas disponibles: \n";
+                    for(Calendar j : fechasPosibles){
+                        // Formato de la fecha ->  \t Fecha nº: dia - mes - año \n
+                            listaFechas += "\t"+ "Fecha nº: " + numeroFecha +
+                                j.get(Calendar.DATE) + " - " +
+                                j.get(Calendar.MONTH) + " - " +
+                                j.get(Calendar.YEAR) + "\n";
+                            numeroFecha++;
+                    }
+                    bufferEnvio = "Elija una fecha \n"+
+                            "\t *: Mostrar más fechas \n" + listaFechas;
+                    outPrinter.println(bufferEnvio);
+                    try{
+                            bufferRecepcion = this.inReader.readLine();
+                    } catch (IOException e) {
+                            System.err.println("Error no se pudo obtener respuesta");
+                    }
+                    int seleccion = Integer.parseInt(bufferRecepcion);
+                    // Si ha seleccionado una fecha de las proporcionadas
+                    if( 0 <= seleccion && seleccion < cant){
+                        fechaSeleccionada = fechasPosibles.get(seleccion);
+                        continua = false;
+                    } else // quiere ver más fechas
+                    { 
+                        // adelantamos la fecha actual 10 días
+                        fechaActual.add(Calendar.DATE, cant);
+                    }
+                       
+            }while(continua);
+            
+            return fechaSeleccionada;
+        }
+        
+        
 	// Aquí es donde se realiza el procesamiento realmente:
 	void procesa(){
             
