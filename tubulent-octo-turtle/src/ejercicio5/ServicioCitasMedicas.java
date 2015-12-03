@@ -7,14 +7,23 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 
 //
 // Nota: si esta clase extendiera la clase Thread, y el procesamiento lo hiciera el método "run()",
 // ¡Podríamos realizar un procesado concurrente! 
 //
 public class ServicioCitasMedicas {
-	// Referencia a un Socket para enviar/recibir las peticiones/respuestas
+	////////////////////////////////////////////////////////////////////////
+        // ATRIBUTOS DE INSTANCIA
+    	////////////////////////////////////////////////////////////////////////
+    
+        // Referencia a un Socket para enviar/recibir las peticiones/respuestas
 	private Socket socketServicio;
 	// Stream de lectura (por aquí se recibe lo que envía el cliente)
 	private InputStream inputStream;
@@ -28,9 +37,19 @@ public class ServicioCitasMedicas {
         private String bufferEnvio = null, 
                         bufferRecepcion = null;
         
+        ////////////////////////////////////////////////////////////////////////
+        // ATRIBUTOS DE CLASE
+    	////////////////////////////////////////////////////////////////////////
+    
+        // Conjunto de fechas ( tipo de dato GregorianCalendar )
+        private static Set<Calendar> agendaCalendario = new TreeSet<>();
+        // Fecha del día de hoy
+        final private static Calendar hoy = Calendar.getInstance();
+        
 	// Constructor que tiene como parámetro una referencia al socket abierto en por otra clase
 	public ServicioCitasMedicas(Socket socketServicio) {
-		this.socketServicio=socketServicio;
+            agendaCalendario.add(hoy);    
+            this.socketServicio=socketServicio;
                 try {
                         // Obtiene los flujos de escritura/lectura
 			inputStream=socketServicio.getInputStream();
@@ -94,8 +113,8 @@ public class ServicioCitasMedicas {
                     bufferRecepcion.length()!=8 ); // acepta todos los DNI's
             return "MENU";
         }
-        
-        private String menu(){
+        // Muestra el menu en el cual el usuario decide su tipo de cita
+        private String menuSeleccion(){
             String seleccion;
             bufferEnvio = "Bienvenido al menú: \n" + 
                         "Elija una opcion de las siguientes \n" +
@@ -109,6 +128,7 @@ public class ServicioCitasMedicas {
             } catch (IOException e) {
                     System.err.println("Error no se pudo obtener respuesta");
             }
+            // clasifica la respuesta del usuario
             switch (Integer.parseInt(bufferRecepcion)) {
                 case 1:
                     seleccion = "EA"; // enfermedad aguda
@@ -119,11 +139,36 @@ public class ServicioCitasMedicas {
                 case 3:
                     seleccion = "AP"; // actividades preventivas
                     break;
-                default:
-                    seleccion = "DISCONNECT";
+                default: // si respondiera cualquier cosa
+                    seleccion = "DISCONNECT"; 
             }
             return seleccion;
         }
+        // Proporciona 10 fechas que no esten ocupadas en la agendaCalendario
+        // a partir de la fecha que se pasa como parámetro
+        private ArrayList<Calendar> MasFechas(Calendar inicial){
+                ArrayList<Calendar> fechasCandidatas = new ArrayList<>();
+                do{
+                        // Añadimos un día a la fecha inicial
+                        inicial.add(Calendar.DATE, 1);
+                        // Si dicha fecha no está en el agendaCalendario
+                        if( !agendaCalendario.contains(inicial) ){
+                            // es una fecha candidata
+                            fechasCandidatas.add( 
+                                    new GregorianCalendar( inicial.get(Calendar.YEAR),
+                                                        inicial.get(Calendar.MONTH),
+                                                        inicial.get(Calendar.DATE) )
+                            );
+                        }
+                    
+                }while( fechasCandidatas.size() != 10 ); // mientras no haya 10 fechas candidatas
+                
+                return fechasCandidatas;
+        }
+        // Ofrece una lista de fechas disponibles para que el usuario elija su cita
+        //private String seleccionCita(){
+                
+        //}
 	// Aquí es donde se realiza el procesamiento realmente:
 	void procesa(){
             
