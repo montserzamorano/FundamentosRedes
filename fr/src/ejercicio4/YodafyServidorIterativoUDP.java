@@ -32,6 +32,9 @@ public class YodafyServidorIterativoUDP {
             } catch(IOException e){
                 System.err.println("Error al procesar la frase");
             }
+            
+            // Cerramos el socket del servidor
+            socketServidor.close();
 			
         } while (true);
 	
