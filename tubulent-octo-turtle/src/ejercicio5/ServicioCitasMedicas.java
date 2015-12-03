@@ -230,18 +230,20 @@ public class ServicioCitasMedicas {
         // Cada método-estado incorpora la gestión de errores, es decir
         // si lo introducido es erróneo, es el método quien se encarga de
         // volver a pedirlo hasta que la entrada sea correcta,
-        // además los posibles bucles del diagrama aquí no están presentes
+        // además los posibles bucles del diagrama están agrupados como se indica
 	void procesa(){
             // ESTADO: COMPAÑIA
-            String mensaje = this.procesaCompania();
+            String mensaje = this.procesaCompania(); // agrupa el caso de error y
+                                                     // el de continua
             if( mensaje.equals("DISCONNECT") ){ // el cliente solicita desconexión
             // ESTADO: FIN
                 fin();
             }else{ // mensaje == "CONT"
             // ESTADO: AUTENTIFICACION
-                    this.autentificacion();
+                    this.autentificacion(); // agrupa el posible bucle de introducción
+                                            // incorrecta del DNI
             // ESTADO: MENU
-                    this.menu();
+                    this.menu();            // agrupa el paso por CITA SELECCION
             }
         }
 
