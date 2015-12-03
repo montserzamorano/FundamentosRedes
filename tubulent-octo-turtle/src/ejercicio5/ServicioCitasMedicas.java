@@ -46,6 +46,25 @@ public class ServicioCitasMedicas {
         // Fecha del día de hoy
         final private static Calendar hoy = Calendar.getInstance();
         
+        // Lee lo que haya sido escrito en el stream de entrada
+        private String lecturaStream(){
+                String leido = null;
+                try{
+                        leido = this.inReader.readLine();
+                } catch (IOException e) {
+                        System.err.println("Error no se pudo obtener respuesta");
+                }
+                return leido;
+        }
+        // Realiza la desconexión
+        private void fin(){
+                try{
+                        socketServicio.close();
+                } catch (IOException e){
+                        System.err.println("Error no se pudo cerrar el socket");
+                } 
+        }
+        
 	// Constructor que tiene como parámetro una referencia al socket abierto
 	public ServicioCitasMedicas(Socket socketServicio) {
             agendaCalendario.add(hoy);    
@@ -67,13 +86,9 @@ public class ServicioCitasMedicas {
             do{     // En primer lugar escribe por el stream al cliente, 
                     // solicitandole la pertenencia
                     bufferEnvio = "¿Pertenece usted a la compañia M&D?, responda SI/NO";
-                    this.outPrinter.println(bufferEnvio);
+                    outPrinter.println(bufferEnvio);
                     // Lee la respuesta es sensible a mayusculas y minusculas
-                    try{
-                            bufferRecepcion = this.inReader.readLine();
-                    } catch (IOException e) {
-                            System.err.println("Error no se pudo obtener respuesta");
-                    }
+                    bufferRecepcion = lecturaStream();
             }while( !bufferRecepcion.equals("SI") ||
                     !bufferRecepcion.equals("NO") );
             
@@ -82,12 +97,8 @@ public class ServicioCitasMedicas {
             }else // bufferRecepcion = "NO"
             {
                     bufferEnvio = "Este servicio es de pago quiere continuar?, responda SI/NO";
-                    this.outPrinter.println(bufferEnvio);
-                    try{
-                            bufferRecepcion = this.inReader.readLine();
-                    } catch (IOException e) {
-                            System.err.println("Error no se pudo obtener respuesta");
-                    }
+                    outPrinter.println(bufferEnvio);
+                    bufferRecepcion = lecturaStream();
                     if( bufferRecepcion.equals("SI") )
                         return "CONT";
                     else 
@@ -95,23 +106,18 @@ public class ServicioCitasMedicas {
             }
         }
         
-        private String autentificacion(){
+        private void autentificacion(){
             int posibleDNI; // ha de tener los mismos dígitos que un DNI convencional
             // Bucle casi infinito, quizas no estaría mal limitar el número de intentos
             do{     // En primer lugar escribe por el stream al cliente, 
                     // solicitandole la pertenencia
                     bufferEnvio = "Proporcione su DNI, sin letra: ";
-                    this.outPrinter.println(bufferEnvio);
+                    outPrinter.println(bufferEnvio);
                     // Lee la respuesta es sensible a mayusculas y minusculas
-                    try{
-                            bufferRecepcion = this.inReader.readLine();
-                    } catch (IOException e) {
-                            System.err.println("Error no se pudo obtener respuesta");
-                    }
+                    bufferRecepcion = lecturaStream();
                     posibleDNI = Integer.parseInt(bufferRecepcion);
             }while( (00000000 > posibleDNI && posibleDNI > 99999999) ||
                     bufferRecepcion.length()!=8 ); // acepta todos los DNI's
-            return "MENU";
         }
         // Muestra el menu en el cual el usuario decide su tipo de cita
         private String menuSeleccion(){
@@ -123,11 +129,7 @@ public class ServicioCitasMedicas {
                             "\t3: Actividades preventivas\n"+
                             "\t*: Salir";
             outPrinter.println(bufferEnvio);
-            try{
-                    bufferRecepcion = this.inReader.readLine();
-            } catch (IOException e) {
-                    System.err.println("Error no se pudo obtener respuesta");
-            }
+            bufferRecepcion = lecturaStream();
             // clasifica la respuesta del usuario
             switch (Integer.parseInt(bufferRecepcion)) {
                 case 1:
@@ -188,11 +190,7 @@ public class ServicioCitasMedicas {
                     bufferEnvio = "Elija una fecha \n"+
                             "\t *: Mostrar más fechas \n" + listaFechas;
                     outPrinter.println(bufferEnvio);
-                    try{
-                            bufferRecepcion = this.inReader.readLine();
-                    } catch (IOException e) {
-                            System.err.println("Error no se pudo obtener respuesta");
-                    }
+                    bufferRecepcion = lecturaStream();
                     int seleccion = Integer.parseInt(bufferRecepcion);
                     // Si ha seleccionado una fecha de las proporcionadas
                     if( 0 <= seleccion && seleccion < cant){
@@ -209,10 +207,42 @@ public class ServicioCitasMedicas {
             return fechaSeleccionada;
         }
         
+        void menu(){
+            String mensaje;
+            Calendar fechaCita;
+            boolean continua = true;
+            do{
+                    mensaje = this.menuSeleccion();
+                    if ( mensaje.equals("DISCONNECT") ){
+                    // ESTADO: FIN
+                            fin();
+                            continua = false;
+                    }else // mensaje == "EA" | "EC" | "AP"
+                    {
+                    // ESTADO: CITA SELECCION
+                            fechaCita = seleccionCita();
+                            agendaCalendario.add(fechaCita);
+                    }
+            }while(continua);
+        }
         
 	// Aquí es donde se realiza el procesamiento realmente:
+        // Cada método-estado incorpora la gestión de errores, es decir
+        // si lo introducido es erróneo, es el método quien se encarga de
+        // volver a pedirlo hasta que la entrada sea correcta,
+        // además los posibles bucles del diagrama aquí no están presentes
 	void procesa(){
-            
-	}
+            // ESTADO: COMPAÑIA
+            String mensaje = this.procesaCompania();
+            if( mensaje.equals("DISCONNECT") ){ // el cliente solicita desconexión
+            // ESTADO: FIN
+                fin();
+            }else{ // mensaje == "CONT"
+            // ESTADO: AUTENTIFICACION
+                    this.autentificacion();
+            // ESTADO: MENU
+                    this.menu();
+            }
+        }
 
 }
