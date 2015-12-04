@@ -68,7 +68,7 @@ public class ClienteTCP {
         //Lee el mensaje y sale si es de desconexión. Lee por pantalla
         
         static private void LeerEscribir(String mensaje) throws IOException{
-            while( (bufferRecepcion = inReader.readLine()) != null){}
+            bufferRecepcion = inReader.readLine();
             if( bufferRecepcion.startsWith("107")){ //si DISCONNECT
                 outPrinter.println("007"); //OKBYE
                 outPrinter.flush();
@@ -128,11 +128,11 @@ public class ClienteTCP {
 		try {
                     socketServicio = new Socket(host,port);
                     //flujos de lectura y escritura del socket
-                    InputStream inputStream = socketServicio.getInputStream();
-                    OutputStream outputStream = socketServicio.getOutputStream();
+                    inputStream = socketServicio.getInputStream();
+                    outputStream = socketServicio.getOutputStream();
                     
-                    PrintWriter outPrinter = new PrintWriter(outputStream,true);
-                    BufferedReader inReader = new BufferedReader(new InputStreamReader(inputStream));
+                    outPrinter = new PrintWriter(outputStream,true);
+                    inReader = new BufferedReader(new InputStreamReader(inputStream));
                     bufferRecepcion = inReader.readLine(); //leo mensaje HELLO
 			
                     do{
