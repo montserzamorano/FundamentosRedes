@@ -210,11 +210,11 @@ public class ServicioCitasMedicas {
                         bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);
                         System.out.println(bufferRecepcion);
                     }
-                    bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);
-                    System.out.println(bufferRecepcion);
+                    //bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);
+                    //System.out.println(bufferRecepcion);
                     if( bufferRecepcion.startsWith("005") ) // responde FECHA + INDICE
                     {   // Confío en que el índice es bueno
-                        tipoint = Integer.parseInt( bufferRecepcion.substring(7) );
+                        tipoint = Integer.parseInt( bufferRecepcion.substring(8) );
                         // "005FECHA".length = 8
                         Calendar seleccionada = fechasPosibles.get(tipoint);
                         // añado una cita en esa fecha
