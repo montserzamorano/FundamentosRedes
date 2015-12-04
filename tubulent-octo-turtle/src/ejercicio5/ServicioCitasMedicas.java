@@ -173,17 +173,14 @@ public class ServicioCitasMedicas {
             }while(00000000 > posibleDNI && posibleDNI > 99999999);
             // ESTADO: AUTH
             boolean continua = true;
-            int cant = 10, tipoint;
+            int cant = 3, tipoint;
             String tipo, listaFechas = "";
             do{
+                outPrinter.println("1-EA(enfermedad aguda), 2-EC(enfermedad cronica), 3-AP(actividad preventiva)");
                 bufferRecepcion = enviarMensaje(105, "MENU", "");
                 System.out.println(bufferRecepcion);
                 if( bufferRecepcion.startsWith("004") ) { // responde SELECT + TIPO
-                    tipo = bufferRecepcion.substring(8);
-                    // "004SELECT".length = 9       
-                    // quizas hacer algo más con el tipo de selección no estaría mal
-                    // puede ser del tipo 
-                    // EA(enfermedad aguda), EC(enfermedad cronica), AP(actividad preventiva)
+                    tipo = bufferRecepcion.substring(8);    
                 // ESTADO: CITA
                     Calendar fechaActual = Calendar.getInstance();
                     ArrayList<Calendar> fechasPosibles = MasFechas(fechaActual, cant);
@@ -193,7 +190,7 @@ public class ServicioCitasMedicas {
                             listaFechas += " nº: "+ numeroFecha + " Fecha " +
                                 j.get(Calendar.DATE) + " - " +
                                 j.get(Calendar.MONTH) + " - " +
-                                j.get(Calendar.YEAR) + "\\";
+                                j.get(Calendar.YEAR) + ";";
                             numeroFecha++;
                     }
                     bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);
@@ -207,7 +204,7 @@ public class ServicioCitasMedicas {
                             listaFechas += numeroFecha + " - Fecha: " +
                                 j.get(Calendar.DATE) + " - " +
                                 j.get(Calendar.MONTH) + " - " +
-                                j.get(Calendar.YEAR) + "\\";
+                                j.get(Calendar.YEAR) + ";";
                             numeroFecha++;
                         }
                         bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);
