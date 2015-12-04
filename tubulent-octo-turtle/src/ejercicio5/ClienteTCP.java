@@ -154,12 +154,13 @@ public class ClienteTCP {
                         //cita
                         LeerEscribir("Seleccione una opción");
                         fecha();
-                        bufferRecepcion = inReader.readLine(); //leer mensaje FIN
+                         LeerEscribir(""); //LEE EL FIN Y ACABA
+                       /* bufferRecepcion = inReader.readLine(); //leer mensaje FIN
                         
                 // } while(!fin);
 
                     socketServicio.close(); //Corte de comunicación
-			
+			*/
 		// Excepciones:
 		} catch (UnknownHostException e) {
                     System.err.println("Error: Nombre de host no encontrado.");
