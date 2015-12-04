@@ -170,7 +170,7 @@ public class ServicioCitasMedicas {
             boolean continua = true;
             int cant = 3, tipoint;
             String tipo, listaFechas = "";
-            do{
+            //do{
                 outPrinter.println("1-EA(enfermedad aguda), 2-EC(enfermedad cronica), 3-AP(actividad preventiva)");
                 bufferRecepcion = enviarMensaje(105, "MENU", "");
                 System.out.println(bufferRecepcion);
@@ -216,14 +216,15 @@ public class ServicioCitasMedicas {
                         agendaCalendario.add(seleccionada);
                     }
                 }
-                else // respuesta EXIT | *
-                {
+              //  else // respuesta EXIT | *
+              //  {
                     // ESTADO: FIN
                     outPrinter.println("Gracias por confiar en nosotros.");
+                    fin();
                     continua = false; 
                     return;
-                }
-            }while(continua);
+              //  }
+            //}while(continua);
                 
         }
 
