@@ -72,7 +72,7 @@ public class ServicioCitasMedicas {
             boolean continua=true;
             // espera a que el cliente envíe la señal de desconexión
             do{
-                bufferRecepcion = enviarMensaje(117, "DISCONNECT","10");
+                bufferRecepcion = enviarMensaje(107, "DISCONNECT","10");
                 if( bufferRecepcion.startsWith("007") ){ // bufferRecepcion == OKBYE
                     continua = false;
                     try{
@@ -101,7 +101,7 @@ public class ServicioCitasMedicas {
             outPrinter.flush();       
             try{
                     bufferRecepcion = this.inReader.readLine();
-                    System.out.println("Recibido" + bufferRecepcion);
+                    System.out.println("Recibido: " + bufferRecepcion);
             } catch (IOException e) {
                     System.err.println("Error no se pudo obtener respuesta");
                     bufferRecepcion = null;
@@ -143,12 +143,19 @@ public class ServicioCitasMedicas {
                 bufferRecepcion = enviarMensaje(103, "PAY2CONT", "");
                 if( bufferRecepcion.startsWith("002") ||
                         !bufferRecepcion.startsWith("001") ) // respuesta NO | *
-                       fin();// ESTADO: FIN 
+                {// ESTADO: FIN 
+                    fin();
+                    return;
+                }
+                
             }
             else
             { 
                 if ( !bufferRecepcion.startsWith("001") ) // respuesta *
+                {
                     fin();// ESTADO: FIN
+                    return;
+                }
             }
             // respuesta SI
             // ESTADO: NO_AUTH
@@ -186,7 +193,7 @@ public class ServicioCitasMedicas {
                             listaFechas += " nº: "+ numeroFecha + " Fecha " +
                                 j.get(Calendar.DATE) + " - " +
                                 j.get(Calendar.MONTH) + " - " +
-                                j.get(Calendar.YEAR) + "\n";
+                                j.get(Calendar.YEAR) + "\\";
                             numeroFecha++;
                     }
                     bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);
@@ -200,7 +207,7 @@ public class ServicioCitasMedicas {
                             listaFechas += numeroFecha + " - Fecha: " +
                                 j.get(Calendar.DATE) + " - " +
                                 j.get(Calendar.MONTH) + " - " +
-                                j.get(Calendar.YEAR) + "\n";
+                                j.get(Calendar.YEAR) + "\\";
                             numeroFecha++;
                         }
                         bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);
@@ -225,7 +232,8 @@ public class ServicioCitasMedicas {
                         socketServicio.close();
                     }catch( IOException e ){
                         System.err.println("Error, no se pudo cerrar el socket");
-                    }   
+                    }  
+                    return;
                 }
             }while(continua);
                 

@@ -65,9 +65,10 @@ public class ClienteTCP {
             bufferRecepcion = inReader.readLine();
             System.out.println("Recibido: "+bufferRecepcion);
             if( bufferRecepcion.startsWith("107")){ //si DISCONNECT
-                outPrinter.println("007"); //OKBYE
+                outPrinter.println("007OKBYE"); //OKBYE
                 outPrinter.flush();
                 fin = true;
+                socketServicio.close();
             }
             else{
                 System.out.println(mensaje);
