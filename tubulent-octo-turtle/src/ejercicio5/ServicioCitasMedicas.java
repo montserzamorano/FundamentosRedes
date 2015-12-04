@@ -101,6 +101,7 @@ public class ServicioCitasMedicas {
             outPrinter.flush();       
             try{
                     bufferRecepcion = this.inReader.readLine();
+                    System.out.println("Recibido" + bufferRecepcion);
             } catch (IOException e) {
                     System.err.println("Error no se pudo obtener respuesta");
                     bufferRecepcion = null;
@@ -182,7 +183,7 @@ public class ServicioCitasMedicas {
                     int numeroFecha = 0;
                     for(Calendar j : fechasPosibles){
                         // Formato de la fecha ->  \t Fecha nº: dia - mes - año \n
-                            listaFechas += numeroFecha + "Fecha nº: " +
+                            listaFechas += " nº: "+ numeroFecha + " Fecha " +
                                 j.get(Calendar.DATE) + " - " +
                                 j.get(Calendar.MONTH) + " - " +
                                 j.get(Calendar.YEAR) + "\n";

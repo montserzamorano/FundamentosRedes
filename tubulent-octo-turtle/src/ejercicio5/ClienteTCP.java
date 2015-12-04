@@ -41,7 +41,7 @@ public class ClienteTCP {
         static private String enviarMensajeCodArg(String cod, String cuerpo, String arg){
             // Si el mensaje es uno de los que requiere argumentos
             bufferEnvio = cod + cuerpo;    
-            outPrinter.println(bufferEnvio);
+            outPrinter.println("Enviado: "+bufferEnvio);
             outPrinter.flush();       
             try{
                     bufferRecepcion = inReader.readLine();
@@ -55,14 +55,15 @@ public class ClienteTCP {
         static private void enviarMensajeCod(String cod, String cuerpo){
             bufferEnvio = cod + cuerpo;
             outPrinter.println(bufferEnvio);
-            outPrinter.flush();       
+            outPrinter.flush();     
+            System.out.println("Enviado: "+bufferEnvio);
         }
         
         //Lee el mensaje y sale si es de desconexión. Lee por pantalla
         
         static private void LeerEscribir(String mensaje) throws IOException{
             bufferRecepcion = inReader.readLine();
-            System.out.println(bufferRecepcion);
+            System.out.println("Recibido: "+bufferRecepcion);
             if( bufferRecepcion.startsWith("107")){ //si DISCONNECT
                 outPrinter.println("007"); //OKBYE
                 outPrinter.flush();
