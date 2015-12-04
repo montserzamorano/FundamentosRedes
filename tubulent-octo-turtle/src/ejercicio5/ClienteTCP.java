@@ -69,7 +69,6 @@ public class ClienteTCP {
                 outPrinter.println("007OKBYE"); //OKBYE
                 outPrinter.flush();
                 fin = true;
-                socketServicio.close();
             }
             else{
                 System.out.println(mensaje);
@@ -133,18 +132,20 @@ public class ClienteTCP {
                     inReader = new BufferedReader(new InputStreamReader(inputStream));
                     bufferRecepcion = inReader.readLine(); //leo mensaje HELLO
 			
-                    do{
+                  //  do{
                         //Compañia
                         LeerEscribir("¿Pertenece a la compañía?(SI/NO):");
                         SiNo();
                         //si no lo es redirige a servicio pago
                         if(codigo.equals("002")){
-                            LeerEscribir("SI/NO:");
+                            LeerEscribir("Este servicio supone un cargo adicional. ¿Desea continuar?(SI/NO)");
                             SiNo();
                         }
                         //dni
+                        if(!fin){
                         LeerEscribir("Introduzca DNI:");
                         DNI();
+                        }
                         //menu
                         while(!salir){
                             bufferRecepcion = inReader.readLine(); //leer el menu
@@ -160,7 +161,8 @@ public class ClienteTCP {
                             fecha();
                         }
                         
-                 } while(!fin);
+                // } while(!fin);
+
                     socketServicio.close(); //Corte de comunicación
 			
 		// Excepciones:
