@@ -68,7 +68,7 @@ public class ClienteTCP {
         //Lee el mensaje y sale si es de desconexión. Lee por pantalla
         
         static private void LeerEscribir(String mensaje) throws IOException{
-            bufferRecepcion = inReader.readLine();
+            while( (bufferRecepcion = inReader.readLine()) != null){}
             if( bufferRecepcion.startsWith("107")){ //si DISCONNECT
                 outPrinter.println("007"); //OKBYE
                 outPrinter.flush();
