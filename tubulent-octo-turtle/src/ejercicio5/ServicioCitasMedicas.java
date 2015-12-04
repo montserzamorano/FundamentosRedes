@@ -96,6 +96,7 @@ public class ServicioCitasMedicas {
             {
                 bufferEnvio = cod + cuerpo;
             }
+            System.out.println("Envio: "+bufferEnvio);
             outPrinter.println(bufferEnvio);
             outPrinter.flush();       
             try{
@@ -134,6 +135,7 @@ public class ServicioCitasMedicas {
         {
             //ESTADO: NO_COMP
             bufferRecepcion = enviarMensaje(102, "COMP", "");
+            System.out.println(bufferRecepcion);
             if( bufferRecepcion.startsWith("002") ) // repuesta NO
             {
                 //ESTADO: SERVICIO_PAGO
@@ -153,6 +155,7 @@ public class ServicioCitasMedicas {
             do // no estaría mal limitar el número de intentos
             {    
                 bufferRecepcion = enviarMensaje(104,"DNI", "");
+                System.out.println(bufferRecepcion);
                 if( bufferRecepcion.startsWith("003") ) // respuesta XXXXXXXX
                 {
                     posibleDNI = Integer.parseInt( bufferRecepcion.substring(10) );
@@ -166,6 +169,7 @@ public class ServicioCitasMedicas {
             String tipo, listaFechas = "";
             do{
                 bufferRecepcion = enviarMensaje(105, "MENU", "");
+                System.out.println(bufferRecepcion);
                 if( bufferRecepcion.startsWith("004") ) { // responde SELECT + TIPO
                     tipo = bufferRecepcion.substring(8);
                     // "004SELECT".length = 9       
@@ -185,6 +189,7 @@ public class ServicioCitasMedicas {
                             numeroFecha++;
                     }
                     bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);
+                    System.out.println(bufferRecepcion);
                     while( bufferRecepcion.startsWith("006") ) // responde MASFECHAS
                     {
                         // adelantamos la fecha actual 10 días
@@ -198,8 +203,10 @@ public class ServicioCitasMedicas {
                             numeroFecha++;
                         }
                         bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);
+                        System.out.println(bufferRecepcion);
                     }
                     bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);
+                    System.out.println(bufferRecepcion);
                     if( bufferRecepcion.startsWith("005") ) // responde FECHA + INDICE
                     {   // Confío en que el índice es bueno
                         tipoint = Integer.parseInt( bufferRecepcion.substring(7) );

@@ -69,6 +69,7 @@ public class ClienteTCP {
         
         static private void LeerEscribir(String mensaje) throws IOException{
             bufferRecepcion = inReader.readLine();
+            System.out.println(bufferRecepcion);
             if( bufferRecepcion.startsWith("107")){ //si DISCONNECT
                 outPrinter.println("007"); //OKBYE
                 outPrinter.flush();
@@ -77,15 +78,16 @@ public class ClienteTCP {
             else{
                 System.out.println(mensaje);
                 bufferEnvio = scan.nextLine(); //leer por pantalla
+                System.out.println("esto es lo introducido: "+bufferEnvio);
             }
         }
         
         //Para respuestas si o no
         
         static private void SiNo(){
-            if(bufferEnvio == "SI")
+            if(bufferEnvio.equals("SI"))
                codigo = "001";
-            else if(bufferEnvio == "NO"){
+            else if(bufferEnvio.equals("NO")){
                 codigo = "002";
             }
             else{
@@ -104,7 +106,7 @@ public class ClienteTCP {
         }
         
         static private void select(){
-            if(bufferEnvio == "EXIT"){
+            if(bufferEnvio.equals("EXIT")){
                 codigo = "008";
             }
             else{
@@ -140,7 +142,7 @@ public class ClienteTCP {
                         LeerEscribir("SI/NO:");
                         SiNo();
                         //si no lo es redirige a servicio pago
-                        if(codigo=="002"){
+                        if(codigo.equals("002")){
                             LeerEscribir("SI/NO:");
                             SiNo();
                         }
@@ -153,7 +155,7 @@ public class ClienteTCP {
                             select();
                             //cita
                             LeerEscribir("Seleccione una opción");
-                            while(codigo == "006"){ //si mas fechas
+                            while(codigo.equals("006")){ //si mas fechas
                                 masFechas();
                                 LeerEscribir("Seleccione una opción:");
                             }
