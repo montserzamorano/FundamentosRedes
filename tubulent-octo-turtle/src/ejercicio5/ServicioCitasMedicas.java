@@ -40,26 +40,10 @@ public class ServicioCitasMedicas {
         // ATRIBUTOS DE CLASE
     	////////////////////////////////////////////////////////////////////////
     
-        // Conjunto de fechas ( tipo de dato GregorianCalendar )
+        // Conjunto de fechas ( tipo de dato Calendar )
         private static Set<Calendar> agendaCalendario = new TreeSet<>();
         // Fecha del día de hoy
         final private static Calendar hoy = Calendar.getInstance();
-        
-        // Lee lo que haya sido escrito en el stream de entrada
-        private String lecturaStream(){
-                String leido = null;
-                try{
-                        leido = this.inReader.readLine();
-                } catch (IOException e) {
-                        System.err.println("Error no se pudo obtener respuesta");
-                }
-                return leido;
-        }
-        // Realiza la desconexión
-        private void fin(){
-            bufferEnvio = "FIN";
-            outPrinter.println(bufferEnvio);
-        }
         
 	// Constructor que tiene como parámetro una referencia al socket abierto
 	public ServicioCitasMedicas(Socket socketServicio) {
@@ -69,37 +53,59 @@ public class ServicioCitasMedicas {
                         // Obtiene los flujos de escritura/lectura
 			inputStream=socketServicio.getInputStream();
 			outputStream=socketServicio.getOutputStream();
-                        //Crear objeto PrintWriter y ReadBuffered
+                        // Crear objeto PrintWriter y ReadBuffered
                         outPrinter = new PrintWriter(outputStream,true);
                         inReader = new BufferedReader (new InputStreamReader(inputStream));
-		} catch (IOException e) {
+                        // Envía mensaje de éxito de conexión
+                        bufferEnvio = 101 + "HELLO";
+                        outPrinter.println(bufferEnvio);
+                        outPrinter.flush();
+                } catch (IOException e) {
 			System.err.println("Error al obtener los flujos de entrada/salida.");
 		}
+                
 	}
-	// Determina si un cliente pertenece a la compañia
-	private String procesaCompania(){
-            // Bucle casi infinito, quizas no estaría mal limitar el número de intentos
-            do{     // En primer lugar escribe por el stream al cliente, 
-                    // solicitandole la pertenencia
-                    bufferEnvio = "¿Pertenece usted a la compañia M&D?, responda SI/NO";
-                    outPrinter.println(bufferEnvio);
-                    // Lee la respuesta es sensible a mayusculas y minusculas
-                    bufferRecepcion = lecturaStream();
-            }while( !bufferRecepcion.equals("SI") ||
-                    !bufferRecepcion.equals("NO") );
+        
+        
+        // Realiza el proceso de desconexión
+        // esta implementación no tiene un contador de desconexión
+        private void fin(){
+            boolean continua=true;
+            // espera a que el cliente envíe la señal de desconexión
+            do{
+                bufferRecepcion = enviarMensaje(117, "DISCONNECT",10);
+                if( bufferRecepcion.startsWith("007") ){ // bufferRecepcion == OKBYE
+                    continua = false;
+                    try{
+                        socketServicio.close();
+                    }catch( IOException e ){
+                        System.err.println("Error, no se pudo cerrar el socket");
+                    }
+                }
+            }while(continua);
             
-            if( bufferRecepcion.equals("SI") ){
-                    return "CONT";
-            }else // bufferRecepcion = "NO"
-            {
-                    bufferEnvio = "Este servicio es de pago quiere continuar?, responda SI/NO";
-                    outPrinter.println(bufferEnvio);
-                    bufferRecepcion = lecturaStream();
-                    if( bufferRecepcion.equals("SI") )
-                        return "CONT";
-                    else 
-                        return "DISCONNECT";
+        }
+        
+        // Envía un tipo determinado de mensaje especificado en los argumentos
+        // y retorna la respuesta del cliente
+        private String enviarMensaje(int cod, String cuerpo, int args){
+            // Si el mensaje es uno de los que requiere argumentos
+            if( cuerpo.equals("FECHAS") || cuerpo.equals("DISCONNECT") ){
+                bufferEnvio = cod + cuerpo + args;    
             }
+            else // el mensaje no requiere de mensajes
+            {
+                bufferEnvio = cod + cuerpo;
+            }
+            outPrinter.println(bufferEnvio);
+            outPrinter.flush();       
+            try{
+                    bufferRecepcion = this.inReader.readLine();
+            } catch (IOException e) {
+                    System.err.println("Error no se pudo obtener respuesta");
+                    bufferRecepcion = null;
+            }
+            return bufferRecepcion;
         }
         
         private void autentificacion(){
@@ -114,6 +120,7 @@ public class ServicioCitasMedicas {
                     posibleDNI = Integer.parseInt(bufferRecepcion);
             }while(00000000 > posibleDNI && posibleDNI > 99999999); // acepta todos los DNI's
         }
+        
         // Muestra el menu en el cual el usuario decide su tipo de cita
         private String menuSeleccion(){
             String seleccion;
@@ -202,43 +209,58 @@ public class ServicioCitasMedicas {
             return fechaSeleccionada;
         }
         
-        void menu(){
-            String mensaje;
-            Calendar fechaCita;
-            boolean continua = true;
-            do{
-                    mensaje = this.menuSeleccion();
-                    if ( mensaje.equals("DISCONNECT") ){
-                    // ESTADO: FIN
-                            fin();
-                            continua = false;
-                    }else // mensaje == "EA" | "EC" | "AP"
-                    {
-                    // ESTADO: CITA SELECCION
-                            fechaCita = seleccionCita();
-                            agendaCalendario.add(fechaCita);
-                    }
-            }while(continua);
-        }
         
 	// Aquí es donde se realiza el procesamiento realmente:
-        // Cada método-estado incorpora la gestión de errores, es decir
-        // si lo introducido es erróneo, es el método quien se encarga de
-        // volver a pedirlo hasta que la entrada sea correcta,
-        // además los posibles bucles del diagrama están agrupados como se indica
-	void procesa(){
-            // ESTADO: COMPAÑIA
-            String mensaje = this.procesaCompania(); // agrupa el caso de error y
-                                                     // el de continua
-            if( mensaje.equals("DISCONNECT") ){ // el cliente solicita desconexión
-            // ESTADO: FIN
-                fin();
-            }else{ // mensaje == "CONT"
-            // ESTADO: AUTENTIFICACION
-                    this.autentificacion(); // agrupa el posible bucle de introducción
-                                            // incorrecta del DNI
-            // ESTADO: MENU
-                    this.menu();            // agrupa el paso por CITA SELECCION
+        void procesa()
+        {
+            //ESTADO: NO_COMP
+            bufferRecepcion = enviarMensaje(102, "COMP", 0);
+            if( bufferRecepcion.startsWith("002") ) // repuesta NO
+            {
+                //ESTADO: SERVICIO_PAGO
+                bufferRecepcion = enviarMensaje(103, "PAY2CONT",0);
+                if( bufferRecepcion.startsWith("002") ||
+                        !bufferRecepcion.startsWith("001") ) // respuesta NO | *
+                       fin();// ESTADO: FIN 
             }
+            else
+            { 
+                if ( !bufferRecepcion.startsWith("001") ) // respuesta *
+                    fin();// ESTADO: FIN
+            }
+            // respuesta SI
+            // ESTADO: NO_AUTH
+            int posibleDNI = -1;
+            do // no estaría mal limitar el número de intentos
+            {    
+                bufferRecepcion = enviarMensaje(104,"DNI",0);
+                if( bufferRecepcion.startsWith("003") ) // respuesta XXXXXXXX
+                {
+                    posibleDNI = Integer.parseInt( bufferRecepcion.substring(10) );
+                    //"003XXXXXXXX".length = 11, pero empezando desde 0 a contar es 10
+                }    
+                
+            }while(00000000 > posibleDNI && posibleDNI > 99999999);
+            // ESTADO: AUTH
+            boolean continua = true;
+            do{
+                bufferRecepcion = enviarMensaje(105, "MENU",0);
+                if( bufferRecepcion.startsWith("004") ) {
+                // ESTADO: CITA
+                    
+                }
+                else // respuesta EXIT | *
+                {
+                    // ESTADO: FIN
+                    continua = false;
+                    try{
+                        socketServicio.close();
+                    }catch( IOException e ){
+                        System.err.println("Error, no se pudo cerrar el socket");
+                    }   
+                }
+            }while(continua);
+                
         }
+
 }
