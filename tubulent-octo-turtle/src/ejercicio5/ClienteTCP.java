@@ -133,7 +133,7 @@ public class ClienteTCP {
 			
                     do{
                         //Compañia
-                        LeerEscribir("SI/NO:");
+                        LeerEscribir("¿Pertenece a la compañía?(SI/NO):");
                         SiNo();
                         //si no lo es redirige a servicio pago
                         if(codigo.equals("002")){
@@ -145,6 +145,7 @@ public class ClienteTCP {
                         DNI();
                         //menu
                         while(!salir){
+                            bufferRecepcion = inReader.readLine(); //leer el menu
                             LeerEscribir("Seleccione una opción");
                             select();
                             //cita

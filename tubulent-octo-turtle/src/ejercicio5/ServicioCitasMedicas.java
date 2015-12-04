@@ -101,7 +101,6 @@ public class ServicioCitasMedicas {
             outPrinter.flush();       
             try{
                     bufferRecepcion = this.inReader.readLine();
-                    System.out.println("Recibido" + bufferRecepcion);
             } catch (IOException e) {
                     System.err.println("Error no se pudo obtener respuesta");
                     bufferRecepcion = null;
@@ -169,14 +168,11 @@ public class ServicioCitasMedicas {
             int cant = 10, tipoint;
             String tipo, listaFechas = "";
             do{
+                outPrinter.println("1-EA(enfermedad aguda), 2-EC(enfermedad cronica), 3-AP(actividad preventiva)");
                 bufferRecepcion = enviarMensaje(105, "MENU", "");
                 System.out.println(bufferRecepcion);
                 if( bufferRecepcion.startsWith("004") ) { // responde SELECT + TIPO
-                    tipo = bufferRecepcion.substring(8);
-                    // "004SELECT".length = 9       
-                    // quizas hacer algo más con el tipo de selección no estaría mal
-                    // puede ser del tipo 
-                    // EA(enfermedad aguda), EC(enfermedad cronica), AP(actividad preventiva)
+                    tipo = bufferRecepcion.substring(8);    
                 // ESTADO: CITA
                     Calendar fechaActual = Calendar.getInstance();
                     ArrayList<Calendar> fechasPosibles = MasFechas(fechaActual, cant);
