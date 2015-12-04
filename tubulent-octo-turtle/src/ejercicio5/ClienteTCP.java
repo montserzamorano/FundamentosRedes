@@ -52,17 +52,10 @@ public class ClienteTCP {
             return bufferRecepcion;
         }
         
-        static private String enviarMensajeCod(String cod, String cuerpo){
+        static private void enviarMensajeCod(String cod, String cuerpo){
             bufferEnvio = cod + cuerpo;
             outPrinter.println(bufferEnvio);
             outPrinter.flush();       
-            try{
-                    bufferRecepcion = inReader.readLine();
-            } catch (IOException e) {
-                    System.err.println("Error no se pudo obtener respuesta");
-                    bufferRecepcion = null;
-            }
-            return bufferRecepcion;
         }
         
         //Lee el mensaje y sale si es de desconexión. Lee por pantalla
