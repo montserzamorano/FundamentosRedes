@@ -108,7 +108,7 @@ public class ServicioCitasMedicas {
             return bufferRecepcion;
         }
         
-        private void autentificacion(){
+        private void autentificacion() throws IOException{
             int posibleDNI; // ha de tener los mismos dígitos que un DNI convencional
             // Bucle casi infinito, quizas no estaría mal limitar el número de intentos
             do{     // En primer lugar escribe por el stream al cliente, 
@@ -116,13 +116,13 @@ public class ServicioCitasMedicas {
                     bufferEnvio = "Proporcione su DNI, sin letra: ";
                     outPrinter.println(bufferEnvio);
                     // Lee la respuesta es sensible a mayusculas y minusculas
-                    bufferRecepcion = lecturaStream();
+                    bufferRecepcion = inReader.readLine();
                     posibleDNI = Integer.parseInt(bufferRecepcion);
             }while(00000000 > posibleDNI && posibleDNI > 99999999); // acepta todos los DNI's
         }
         
         // Muestra el menu en el cual el usuario decide su tipo de cita
-        private String menuSeleccion(){
+        private String menuSeleccion() throws IOException{
             String seleccion;
             bufferEnvio = "Bienvenido al menú: \n" + 
                         "Elija una opcion de las siguientes \n" +
@@ -131,7 +131,7 @@ public class ServicioCitasMedicas {
                             "\t3: Actividades preventivas\n"+
                             "\t*: Salir";
             outPrinter.println(bufferEnvio);
-            bufferRecepcion = lecturaStream();
+            bufferRecepcion = inReader.readLine();
             // clasifica la respuesta del usuario
             switch (Integer.parseInt(bufferRecepcion)) {
                 case 1:
@@ -172,7 +172,7 @@ public class ServicioCitasMedicas {
         
         // Ofrece una lista de fechas disponibles para que el usuario elija su
         // cita, devuelve la fecha seleccionada por el cliente
-        private Calendar seleccionCita(){
+        private Calendar seleccionCita() throws IOException{
             int cant = 10;
             boolean continua = true;
             Calendar fechaSeleccionada = null;
@@ -192,7 +192,7 @@ public class ServicioCitasMedicas {
                     bufferEnvio = "Elija una fecha \n"+
                             "\t *: Mostrar más fechas \n" + listaFechas;
                     outPrinter.println(bufferEnvio);
-                    bufferRecepcion = lecturaStream();
+                    bufferRecepcion = inReader.readLine();
                     int seleccion = Integer.parseInt(bufferRecepcion);
                     // Si ha seleccionado una fecha de las proporcionadas
                     if( 0 <= seleccion && seleccion < cant){
