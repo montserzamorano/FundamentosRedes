@@ -147,19 +147,14 @@ public class ClienteTCP {
                         DNI();
                         }
                         //menu
-                        while(!salir){
-                            bufferRecepcion = inReader.readLine(); //leer el menu
-                            System.out.println(bufferRecepcion);
-                            LeerEscribir("Seleccione una opción");
-                            select();
-                            //cita
-                            LeerEscribir("Seleccione una opción");
-                            /*while(codigo.equals("006")){ //si mas fechas
-                                masFechas();
-                                LeerEscribir("Seleccione una opción:");
-                            }*/
-                            fecha();
-                        }
+                        bufferRecepcion = inReader.readLine(); //leer el menu
+                        System.out.println(bufferRecepcion);
+                        LeerEscribir("Seleccione una opción");
+                        select();
+                        //cita
+                        LeerEscribir("Seleccione una opción");
+                        fecha();
+                        bufferRecepcion = inReader.readLine(); //leer mensaje FIN
                         
                 // } while(!fin);
 

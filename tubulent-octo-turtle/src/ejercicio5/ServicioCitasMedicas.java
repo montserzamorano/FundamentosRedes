@@ -75,11 +75,6 @@ public class ServicioCitasMedicas {
                 bufferRecepcion = enviarMensaje(107, "DISCONNECT","10");
                 if( bufferRecepcion.startsWith("007") ){ // bufferRecepcion == OKBYE
                     continua = false;
-                    try{
-                        socketServicio.close();
-                    }catch( IOException e ){
-                        System.err.println("Error, no se pudo cerrar el socket");
-                    }
                 }
             }while(continua);
             
@@ -224,12 +219,8 @@ public class ServicioCitasMedicas {
                 else // respuesta EXIT | *
                 {
                     // ESTADO: FIN
-                    continua = false;
-                    try{
-                        socketServicio.close();
-                    }catch( IOException e ){
-                        System.err.println("Error, no se pudo cerrar el socket");
-                    }  
+                    outPrinter.println("Gracias por confiar en nosotros.");
+                    continua = false; 
                     return;
                 }
             }while(continua);
