@@ -165,7 +165,7 @@ public class ServicioCitasMedicas {
             }while(00000000 > posibleDNI && posibleDNI > 99999999);
             // ESTADO: AUTH
             boolean continua = true;
-            int cant = 10, tipoint;
+            int cant = 3, tipoint;
             String tipo, listaFechas = "";
             do{
                 outPrinter.println("1-EA(enfermedad aguda), 2-EC(enfermedad cronica), 3-AP(actividad preventiva)");
@@ -182,7 +182,7 @@ public class ServicioCitasMedicas {
                             listaFechas += " nº: "+ numeroFecha + " Fecha " +
                                 j.get(Calendar.DATE) + " - " +
                                 j.get(Calendar.MONTH) + " - " +
-                                j.get(Calendar.YEAR) + "\n";
+                                j.get(Calendar.YEAR) + ";";
                             numeroFecha++;
                     }
                     bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);
@@ -196,7 +196,7 @@ public class ServicioCitasMedicas {
                             listaFechas += numeroFecha + " - Fecha: " +
                                 j.get(Calendar.DATE) + " - " +
                                 j.get(Calendar.MONTH) + " - " +
-                                j.get(Calendar.YEAR) + "\n";
+                                j.get(Calendar.YEAR) + ";";
                             numeroFecha++;
                         }
                         bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);

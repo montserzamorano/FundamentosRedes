@@ -40,9 +40,10 @@ public class ClienteTCP {
         // y retorna la respuesta del cliente
         static private String enviarMensajeCodArg(String cod, String cuerpo, String arg){
             // Si el mensaje es uno de los que requiere argumentos
-            bufferEnvio = cod + cuerpo;    
-            outPrinter.println("Enviado: "+bufferEnvio);
+            bufferEnvio = cod + cuerpo+ arg;    
+            outPrinter.println(bufferEnvio);
             outPrinter.flush();       
+            System.out.println("Enviado:"+bufferEnvio);
             try{
                     bufferRecepcion = inReader.readLine();
             } catch (IOException e) {
@@ -72,7 +73,7 @@ public class ClienteTCP {
             else{
                 System.out.println(mensaje);
                 bufferEnvio = scan.nextLine(); //leer por pantalla
-                System.out.println("esto es lo introducido: "+bufferEnvio);
+                System.out.println("Introducido: "+bufferEnvio);
             }
         }
         
@@ -146,14 +147,15 @@ public class ClienteTCP {
                         //menu
                         while(!salir){
                             bufferRecepcion = inReader.readLine(); //leer el menu
+                            System.out.println(bufferRecepcion);
                             LeerEscribir("Seleccione una opción");
                             select();
                             //cita
                             LeerEscribir("Seleccione una opción");
-                            while(codigo.equals("006")){ //si mas fechas
+                            /*while(codigo.equals("006")){ //si mas fechas
                                 masFechas();
                                 LeerEscribir("Seleccione una opción:");
-                            }
+                            }*/
                             fecha();
                         }
                         
