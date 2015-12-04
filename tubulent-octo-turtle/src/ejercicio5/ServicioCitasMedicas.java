@@ -73,7 +73,7 @@ public class ServicioCitasMedicas {
             boolean continua=true;
             // espera a que el cliente envíe la señal de desconexión
             do{
-                bufferRecepcion = enviarMensaje(117, "DISCONNECT",10);
+                bufferRecepcion = enviarMensaje(117, "DISCONNECT","10");
                 if( bufferRecepcion.startsWith("007") ){ // bufferRecepcion == OKBYE
                     continua = false;
                     try{
@@ -88,7 +88,7 @@ public class ServicioCitasMedicas {
         
         // Envía un tipo determinado de mensaje especificado en los argumentos
         // y retorna la respuesta del cliente
-        private String enviarMensaje(int cod, String cuerpo, int args){
+        private String enviarMensaje(int cod, String cuerpo, String args){
             // Si el mensaje es uno de los que requiere argumentos
             if( cuerpo.equals("FECHAS") || cuerpo.equals("DISCONNECT") ){
                 bufferEnvio = cod + cuerpo + args;    
@@ -108,46 +108,6 @@ public class ServicioCitasMedicas {
             return bufferRecepcion;
         }
         
-        private void autentificacion(){
-            int posibleDNI; // ha de tener los mismos dígitos que un DNI convencional
-            // Bucle casi infinito, quizas no estaría mal limitar el número de intentos
-            do{     // En primer lugar escribe por el stream al cliente, 
-                    // solicitandole la pertenencia
-                    bufferEnvio = "Proporcione su DNI, sin letra: ";
-                    outPrinter.println(bufferEnvio);
-                    // Lee la respuesta es sensible a mayusculas y minusculas
-                    bufferRecepcion = lecturaStream();
-                    posibleDNI = Integer.parseInt(bufferRecepcion);
-            }while(00000000 > posibleDNI && posibleDNI > 99999999); // acepta todos los DNI's
-        }
-        
-        // Muestra el menu en el cual el usuario decide su tipo de cita
-        private String menuSeleccion(){
-            String seleccion;
-            bufferEnvio = "Bienvenido al menú: \n" + 
-                        "Elija una opcion de las siguientes \n" +
-                            "\t1: Enfermedad aguda\n"+
-                            "\t2: Enfermedad crónica\n"+
-                            "\t3: Actividades preventivas\n"+
-                            "\t*: Salir";
-            outPrinter.println(bufferEnvio);
-            bufferRecepcion = lecturaStream();
-            // clasifica la respuesta del usuario
-            switch (Integer.parseInt(bufferRecepcion)) {
-                case 1:
-                    seleccion = "EA"; // enfermedad aguda
-                    break;
-                case 2:
-                    seleccion = "EC"; // enfermedad crónica
-                    break;
-                case 3:
-                    seleccion = "AP"; // actividades preventivas
-                    break;
-                default: // si respondiera cualquier cosa
-                    seleccion = "DISCONNECT"; 
-            }
-            return seleccion;
-        }
         // Proporciona una cantidadde  fechas que no esten ocupadas en la 
         // agendaCalendario a partir de la fecha que se pasa como parámetro
         private ArrayList<Calendar> MasFechas(Calendar inicial, int cantidad){
@@ -170,55 +130,15 @@ public class ServicioCitasMedicas {
                 return fechasCandidatas;
         }
         
-        // Ofrece una lista de fechas disponibles para que el usuario elija su
-        // cita, devuelve la fecha seleccionada por el cliente
-        private Calendar seleccionCita(){
-            int cant = 10;
-            boolean continua = true;
-            Calendar fechaSeleccionada = null;
-            Calendar fechaActual = Calendar.getInstance();
-            do{
-                    ArrayList<Calendar> fechasPosibles = MasFechas(fechaActual, cant);
-                    int numeroFecha = 0;
-                    String listaFechas = "Fechas disponibles: \n";
-                    for(Calendar j : fechasPosibles){
-                        // Formato de la fecha ->  \t Fecha nº: dia - mes - año \n
-                            listaFechas += "\t"+ "Fecha nº: " + numeroFecha +
-                                j.get(Calendar.DATE) + " - " +
-                                j.get(Calendar.MONTH) + " - " +
-                                j.get(Calendar.YEAR) + "\n";
-                            numeroFecha++;
-                    }
-                    bufferEnvio = "Elija una fecha \n"+
-                            "\t *: Mostrar más fechas \n" + listaFechas;
-                    outPrinter.println(bufferEnvio);
-                    bufferRecepcion = lecturaStream();
-                    int seleccion = Integer.parseInt(bufferRecepcion);
-                    // Si ha seleccionado una fecha de las proporcionadas
-                    if( 0 <= seleccion && seleccion < cant){
-                        fechaSeleccionada = fechasPosibles.get(seleccion);
-                        continua = false;
-                    } else // quiere ver más fechas
-                    { 
-                        // adelantamos la fecha actual 10 días
-                        fechaActual.add(Calendar.DATE, cant);
-                    }
-                       
-            }while(continua);
-            
-            return fechaSeleccionada;
-        }
-        
-        
 	// Aquí es donde se realiza el procesamiento realmente:
         void procesa()
         {
             //ESTADO: NO_COMP
-            bufferRecepcion = enviarMensaje(102, "COMP", 0);
+            bufferRecepcion = enviarMensaje(102, "COMP", "");
             if( bufferRecepcion.startsWith("002") ) // repuesta NO
             {
                 //ESTADO: SERVICIO_PAGO
-                bufferRecepcion = enviarMensaje(103, "PAY2CONT",0);
+                bufferRecepcion = enviarMensaje(103, "PAY2CONT", "");
                 if( bufferRecepcion.startsWith("002") ||
                         !bufferRecepcion.startsWith("001") ) // respuesta NO | *
                        fin();// ESTADO: FIN 
@@ -233,21 +153,62 @@ public class ServicioCitasMedicas {
             int posibleDNI = -1;
             do // no estaría mal limitar el número de intentos
             {    
-                bufferRecepcion = enviarMensaje(104,"DNI",0);
+                bufferRecepcion = enviarMensaje(104,"DNI", "");
                 if( bufferRecepcion.startsWith("003") ) // respuesta XXXXXXXX
                 {
                     posibleDNI = Integer.parseInt( bufferRecepcion.substring(10) );
-                    //"003XXXXXXXX".length = 11, pero empezando desde 0 a contar es 10
+                    // "003XXXXXXXX".length = 11, pero empezando desde 0 a contar es 10
                 }    
                 
             }while(00000000 > posibleDNI && posibleDNI > 99999999);
             // ESTADO: AUTH
             boolean continua = true;
+            int cant = 10, tipoint;
+            String tipo, listaFechas = "";
             do{
-                bufferRecepcion = enviarMensaje(105, "MENU",0);
-                if( bufferRecepcion.startsWith("004") ) {
+                bufferRecepcion = enviarMensaje(105, "MENU", "");
+                if( bufferRecepcion.startsWith("004") ) { // responde SELECT + TIPO
+                    tipo = bufferRecepcion.substring(8);
+                    // "004SELECT".length = 9       
+                    // quizas hacer algo más con el tipo de selección no estaría mal
+                    // puede ser del tipo 
+                    // EA(enfermedad aguda), EC(enfermedad cronica), AP(actividad preventiva)
                 // ESTADO: CITA
-                    
+                    Calendar fechaActual = Calendar.getInstance();
+                    ArrayList<Calendar> fechasPosibles = MasFechas(fechaActual, cant);
+                    int numeroFecha = 0;
+                    for(Calendar j : fechasPosibles){
+                        // Formato de la fecha ->  \t Fecha nº: dia - mes - año \n
+                            listaFechas += numeroFecha + "Fecha nº: " +
+                                j.get(Calendar.DATE) + " - " +
+                                j.get(Calendar.MONTH) + " - " +
+                                j.get(Calendar.YEAR) + "\n";
+                            numeroFecha++;
+                    }
+                    bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);
+                    while( bufferRecepcion.startsWith("006") ) // responde MASFECHAS
+                    {
+                        // adelantamos la fecha actual 10 días
+                        fechaActual.add(Calendar.DATE, cant);
+                        for(Calendar j : fechasPosibles){
+                        // Formato de la fecha ->  \t Fecha nº: dia - mes - año \n
+                            listaFechas += numeroFecha + " - Fecha: " +
+                                j.get(Calendar.DATE) + " - " +
+                                j.get(Calendar.MONTH) + " - " +
+                                j.get(Calendar.YEAR) + "\n";
+                            numeroFecha++;
+                        }
+                        bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);
+                    }
+                    bufferRecepcion = enviarMensaje(106,"FECHAS",listaFechas);
+                    if( bufferRecepcion.startsWith("005") ) // responde FECHA + INDICE
+                    {   // Confío en que el índice es bueno
+                        tipoint = Integer.parseInt( bufferRecepcion.substring(7) );
+                        // "005FECHA".length = 8
+                        Calendar seleccionada = fechasPosibles.get(tipoint);
+                        // añado una cita en esa fecha
+                        agendaCalendario.add(seleccionada);
+                    }
                 }
                 else // respuesta EXIT | *
                 {
