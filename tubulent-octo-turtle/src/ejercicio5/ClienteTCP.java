@@ -14,9 +14,8 @@ public class ClienteTCP {
 
 	public static void main(String[] args) {
 		
-		byte []buferEnvio = new byte[256];
-		byte []buferRecepcion=new byte[256];
-		int bytesLeidos=0;
+                String envio = null;
+                String respuesta = null;
                 boolean fin = false;
 		
 		// Nombre del host donde se ejecuta el servidor:
@@ -36,27 +35,23 @@ public class ClienteTCP {
                     //flujos de lectura y escritura del socket
                     InputStream inputStream = socketServicio.getInputStream();
                     OutputStream outputStream = socketServicio.getOutputStream();
+                    
+                    PrintWriter outPrinter = new PrintWriter(outputStream,true);
+                    BufferedReader inReader = new BufferedReader(new InputStreamReader(inputStream));
+			
                     do{
                         //Leo del buffer
-                        String envio = new String(buferRecepcion);
+                        respuesta = inReader.readLine();
                         
                         // Comparo
-                        if (envio.equals("FIN"))
+                        if (respuesta.equals("FIN"))
                             fin = true;
                        
                         
                         //Envio al servidor
-                        String respuesta = scan.nextLine();
-                        buferEnvio = respuesta.getBytes();
-                    
-                        // Leemos la respuesta del servidor. Para ello le pasamos un array de bytes, que intentará
-                        // rellenar. El método "read(...)" devolverá el número de bytes leídos.
-                        outputStream.write(buferEnvio,0,buferEnvio.length) ;
-			
-                    // Aunque le indiquemos a TCP que queremos enviar varios arrays de bytes, sólo
-                    // los enviará efectivamente cuando considere que tiene suficientes datos que enviar...
-                    // Podemos usar "flush()" para obligar a TCP a que no espere para hacer el envío:
-                    outputStream.flush();
+                        envio = scan.nextLine();
+                        outPrinter.println(envio);
+                        
                  } while(!fin);
                     // Una vez terminado el servicio, cerramos el socket (automáticamente se cierran
                     // el inpuStream  y el outputStream)

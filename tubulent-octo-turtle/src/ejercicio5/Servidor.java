@@ -25,11 +25,7 @@ public class Servidor {
                     do {
                         // Aceptamos una nueva conexión con accept()
 			Socket socketServicio = null ;
-                        try {
-                            socketServicio = socketServidor.accept();
-                        } catch (IOException e){
-                            System.out.println("Error: no se pudo aceptar la conexión solicitada.");
-                        }
+                        socketServicio = socketServidor.accept();
                         
 			ServicioCitasMedicas procesador=new ServicioCitasMedicas(socketServicio);
 			procesador.procesa();
